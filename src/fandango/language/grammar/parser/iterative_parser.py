@@ -49,6 +49,13 @@ class IterativeParser(NodeVisitor):
         self._hookin_parent: Optional[DerivationTree] = None
         self._prefix_word = None
 
+        self.spectra: dict[str, set] = {
+            "finished": set(),
+            "predicted": set(),
+            "incomplete": set(),
+        }
+
+
     def _process(self):
         self._rules.clear()
         self._implicit_rules.clear()
@@ -275,6 +282,7 @@ class IterativeParser(NodeVisitor):
         symbol = state.dot
         assert symbol is not None
         assert isinstance(symbol, NonTerminal)
+        self.spectra["predicted"].add(symbol)
         if state.dot in self._rules:
             table[k].update(
                 {
@@ -459,6 +467,7 @@ class IterativeParser(NodeVisitor):
 
         check_word = word[w:]
         if state.is_incomplete:
+            self.spectra["incomplete"].add(state.nonterminal)
             prev_terminal = state.children[-1]
             prev_val = prev_terminal.symbol.value()
             prev_val_raw: str | bytes
@@ -538,6 +547,7 @@ class IterativeParser(NodeVisitor):
         check_word = word[w:]
         prev_match_length = 0
         if state.is_incomplete:
+            self.spectra["incomplete"].add(state.nonterminal)
             prev_terminal = state.children[-1]
             prev_val = prev_terminal.symbol.value()
             prev_val_raw: str | bytes
@@ -655,6 +665,7 @@ class IterativeParser(NodeVisitor):
         k: int,
         use_implicit: bool = False,
     ):
+        self.spectra["finished"].add(state.nonterminal)
         for s in table[state.position].find_dot(state.nonterminal):
             dot_params = dict(s.dot_params)
             s = s.next()
@@ -753,6 +764,9 @@ class IterativeParser(NodeVisitor):
         self._hookin_parent = deepcopy(hookin_parent)
         self._clear_tmp()
 
+        # 🎯 Reset spectra each parse
+        self.spectra = {"finished": set(), "predicted": set(), "incomplete": set()}
+
     def consume(self, char: str | bytes | int):
         for tree in self._consume(char):
             yield self.to_derivation_tree(tree)
@@ -841,6 +855,16 @@ class IterativeParser(NodeVisitor):
             curr_table_idx += 1
             if curr_table_idx % 8 == 0:
                 curr_word_idx += 1
+
+        # 🎯 NEW: End-of-parse sweep to classify unfinished rules
+        for col in table:
+            for state in col:
+                if state.finished():
+                    self.spectra["finished"].add(state.nonterminal)
+                else:
+                    # rule was predicted/started but not finished
+                    self.spectra["incomplete"].add(state.nonterminal)
+
 
     def max_position(self):
         """Return the maximum position reached during parsing."""
