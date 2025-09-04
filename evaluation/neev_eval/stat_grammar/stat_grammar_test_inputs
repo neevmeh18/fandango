@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1. USER ok (+OK with text), PASS ok (+OK with text), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n+OK Logged in\r\nSTAT\r\n+OK 2 320\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2. USER ok (bare +OK), PASS ok (bare +OK), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK\r\nSTAT\r\n+OK 0 0\r\nQUIT\r\n+OK\r\n",
+
+# 3. USER ok (+OK with text), PASS error (-ERR ...), STAT still attempted, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK User ok\r\nPASS NEWpass123\r\n-ERR Wrong password\r\nSTAT\r\n+OK 0 0\r\nQUIT\r\n+OK Closing\r\n",
+
+# 4. USER error (-ERR ...), PASS ok (+OK with text), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Accepted\r\nSTAT\r\n+OK 3 456\r\nQUIT\r\n+OK End\r\n",
+
+# 5. USER error (-ERR ...), PASS error (-ERR ...), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Unknown user\r\nPASS NEWpass123\r\n-ERR Invalid password\r\nSTAT\r\n+OK 1 100\r\nQUIT\r\n+OK Done\r\n",
+
+# 6. USER ok (+OK with spaces only), PASS ok (+OK with text), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK   \r\nPASS NEWpass123\r\n+OK Proceed\r\nSTAT\r\n+OK 4 789\r\nQUIT\r\n+OK Finished\r\n",
+
+# 7. USER ok (+OK with text), PASS ok (+OK with spaces only), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK All good\r\nPASS NEWpass123\r\n+OK   \r\nSTAT\r\n+OK 5 999\r\nQUIT\r\n+OK Completed\r\n",
+
+# 8. USER ok (+OK bare), PASS error (-ERR ...), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n-ERR Wrong pass\r\nSTAT\r\n+OK 2 210\r\nQUIT\r\n+OK Bye\r\n",
+
+# 9. USER error (-ERR ...), PASS ok (+OK bare), STAT ok, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR User blocked\r\nPASS NEWpass123\r\n+OK\r\nSTAT\r\n+OK 3 333\r\nQUIT\r\n+OK Closing\r\n",
+
+# 10. USER ok (+OK text), PASS ok (+OK text), STAT ok with only +OK\r\n, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hi\r\nPASS NEWpass123\r\n+OK Pass ok\r\nSTAT\r\n+OK\r\nQUIT\r\n+OK\r\n"
+
+]

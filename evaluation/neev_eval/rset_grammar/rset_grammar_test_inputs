@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1) USER simple +OK, PASS +OK text, RSET +OK text, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Logged in\r\nRSET\r\n+OK State reset\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2) USER +OK text, PASS +OK with empty text (just space), RSET simple +OK, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hello\r\nPASS NEWpass123\r\n+OK \r\nRSET\r\n+OK\r\nQUIT\r\n+OK Closing\r\n",
+
+# 3) USER -ERR text, PASS +OK text, RSET -ERR text, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Proceed\r\nRSET\r\n-ERR Not allowed\r\nQUIT\r\n+OK End\r\n",
+
+# 4) USER +OK text, PASS -ERR text, RSET +OK text, QUIT -ERR text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hello\r\nPASS NEWpass123\r\n-ERR Wrong password\r\nRSET\r\n+OK State cleared\r\nQUIT\r\n-ERR Quit denied\r\n",
+
+# 5) USER simple +OK, PASS -ERR text, RSET simple +OK, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n-ERR Invalid password\r\nRSET\r\n+OK\r\nQUIT\r\n+OK Bye\r\n",
+
+# 6) USER -ERR text, PASS +OK text, RSET +OK with empty text (just space), QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Blocked\r\nPASS NEWpass123\r\n+OK Accepted\r\nRSET\r\n+OK \r\nQUIT\r\n+OK Done\r\n",
+
+# 7) USER +OK text, PASS +OK text, RSET -ERR text, QUIT -ERR text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK User ok\r\nPASS NEWpass123\r\n+OK Pass ok\r\nRSET\r\n-ERR Temporary failure\r\nQUIT\r\n-ERR Closing error\r\n",
+
+# 8) USER +OK text, PASS +OK text, RSET simple +OK, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK All good\r\nPASS NEWpass123\r\n+OK Great\r\nRSET\r\n+OK\r\nQUIT\r\n+OK See you\r\n",
+
+# 9) USER simple +OK, PASS +OK text, RSET +OK text, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Logged in\r\nRSET\r\n+OK Reset\r\nQUIT\r\n+OK Bye\r\n",
+
+# 10) USER +OK text, PASS -ERR text, RSET -ERR text, QUIT +OK text
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n-ERR Bad pass\r\nRSET\r\n-ERR Not permitted\r\nQUIT\r\n+OK End\r\n"
+
+]

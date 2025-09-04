@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1. USER ok (+OK\r\n), PASS ok (+OK <text>), LIST multi-line (2 entries), QUIT ok (+OK <text>)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Logged in\r\nLIST\r\n+OK Scan listing follows\r\n1 120\r\n2 456\r\n.\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2. USER ok, PASS fail (-ERR ...), LIST rejected, QUIT rejected
+"+OK Hello there\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n-ERR Invalid password\r\nLIST\r\n-ERR Not logged in\r\nQUIT\r\n-ERR Session not started\r\n",
+
+# 3. USER rejected (-ERR ...), PASS ok (+OK <text>), LIST single-line response, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Proceed\r\nLIST\r\n+OK 2 messages\r\nQUIT\r\n+OK End\r\n",
+
+# 4. USER ok, PASS ok (+OK <text>), LIST with +OK alone (positive_response_alone), QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK text\r\nLIST\r\n+OK\r\nQUIT\r\n+OK Completed\r\n",
+
+# 5. USER ok, PASS error (-ERR ...), LIST error, QUIT error
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n-ERR Wrong pass\r\nLIST\r\n-ERR Not allowed\r\nQUIT\r\n-ERR Quit denied\r\n",
+
+# 6. USER ok, PASS ok, LIST with message number success (LIST 5), QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Logged in\r\nLIST 5\r\n+OK Message 5 is 320 octets\r\nQUIT\r\n+OK Done\r\n",
+
+# 7. USER ok, PASS ok, LIST with message number negative response
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK text\r\nLIST 3\r\n-ERR No such message\r\nQUIT\r\n+OK Exit\r\n",
+
+# 8. USER ok, PASS ok, LIST multi-line with only one entry, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK text\r\nLIST\r\n+OK Mailbox scan\r\n1 123\r\n.\r\nQUIT\r\n+OK Terminated\r\n",
+
+# 9. USER error, PASS error, LIST multi-line empty (just terminator), QUIT error
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Unknown user\r\nPASS NEWpass123\r\n-ERR Blocked\r\nLIST\r\n+OK Mailbox is empty\r\n.\r\nQUIT\r\n-ERR Quit failed\r\n",
+
+# 10. USER ok, PASS ok, LIST ok single-line, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK All good\r\nLIST\r\n+OK 1 message\r\nQUIT\r\n+OK See you\r\n"
+
+]

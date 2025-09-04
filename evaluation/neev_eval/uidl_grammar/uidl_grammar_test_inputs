@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1. USER ok (+OK text), PASS ok (+OK text), UIDL multi-line with multiple entries, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n+OK Logged in\r\nUIDL\r\n+OK Listing follows\r\n1 abc123\r\n2 def456\r\n.\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2. USER ok (bare +OK), PASS ok (+OK text), UIDL with bare +OK and single entry, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Success\r\nUIDL\r\n+OK\r\n1 ghi789\r\n.\r\nQUIT\r\n+OK Completed\r\n",
+
+# 3. USER ok (+OK text), PASS ok (+OK text), UIDL with bare +OK and empty listing, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK User ok\r\nPASS NEWpass123\r\n+OK Pass ok\r\nUIDL\r\n+OK\r\n.\r\nQUIT\r\n+OK Done\r\n",
+
+# 4. USER ok (+OK text), PASS ok (+OK text), UIDL with +OK text and empty listing, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hello\r\nPASS NEWpass123\r\n+OK Pass ok\r\nUIDL\r\n+OK No messages\r\n.\r\nQUIT\r\n+OK Exit\r\n",
+
+# 5. USER ok (+OK text), PASS error (-ERR ...), UIDL negative response, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n-ERR Wrong password\r\nUIDL\r\n-ERR Not logged in\r\nQUIT\r\n+OK Bye\r\n",
+
+# 6. USER error (-ERR ...), PASS ok (+OK text), UIDL with bare +OK and one entry, QUIT error
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Proceed\r\nUIDL\r\n+OK\r\n2 jkl012\r\n.\r\nQUIT\r\n-ERR Quit failed\r\n",
+
+# 7. USER error (-ERR ...), PASS error (-ERR ...), UIDL with +OK text and empty listing, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR User blocked\r\nPASS NEWpass123\r\n-ERR Invalid\r\nUIDL\r\n+OK Empty\r\n.\r\nQUIT\r\n+OK Closing\r\n",
+
+# 8. USER ok (bare +OK), PASS ok (+OK text), UIDL with bare +OK and message_number=0, QUIT ok
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Pass accepted\r\nUIDL\r\n+OK\r\n0 uid000\r\n.\r\nQUIT\r\n+OK End\r\n",
+
+# 9. USER ok (+OK text), PASS ok (+OK text), UIDL with +OK text and message_number=5, QUIT error
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Fine\r\nPASS NEWpass123\r\n+OK Pass ok\r\nUIDL\r\n+OK Max entry\r\n5 zzz999\r\n.\r\nQUIT\r\n-ERR Quit denied\r\n",
+
+# 10. USER ok (+OK text), PASS ok (+OK text), UIDL negative response, QUIT negative response
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK All good\r\nPASS NEWpass123\r\n+OK Accepted\r\nUIDL\r\n-ERR UIDL temporarily unavailable\r\nQUIT\r\n-ERR Quit error\r\n"
+
+]

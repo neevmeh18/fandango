@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1. USER ok (+OK text), PASS ok (+OK text), DELE ok (+OK text), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n+OK Logged in\r\nDELE 1\r\n+OK Message deleted\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2. USER ok (bare +OK), PASS ok (+OK text), DELE ok (+OK text), QUIT ok (+OK text, fixed)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Success\r\nDELE 2\r\n+OK Deleted\r\nQUIT\r\n+OK Closing\r\n",
+
+# 3. USER ok (+OK text), PASS error (-ERR ...), DELE ok (+OK text), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK User ok\r\nPASS NEWpass123\r\n-ERR Wrong password\r\nDELE 3\r\n+OK Deleted\r\nQUIT\r\n+OK Closing\r\n",
+
+# 4. USER error (-ERR ...), PASS ok (+OK text), DELE ok (+OK text), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Accepted\r\nDELE 4\r\n+OK Message 4 deleted\r\nQUIT\r\n+OK End\r\n",
+
+# 5. USER error (-ERR ...), PASS error (-ERR ...), DELE ok (+OK text), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Unknown user\r\nPASS NEWpass123\r\n-ERR Invalid password\r\nDELE 5\r\n+OK Deleted\r\nQUIT\r\n+OK Done\r\n",
+
+# 6. USER ok (+OK text), PASS ok (+OK text), DELE error (-ERR ...), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hello\r\nPASS NEWpass123\r\n+OK Pass ok\r\nDELE 6\r\n-ERR No such message\r\nQUIT\r\n+OK Finished\r\n",
+
+# 7. USER ok (+OK text), PASS ok (+OK text), DELE ok (+OK text), QUIT error (-ERR ...)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK All good\r\nPASS NEWpass123\r\n+OK Pass ok\r\nDELE 7\r\n+OK Message 7 deleted\r\nQUIT\r\n-ERR Quit failed\r\n",
+
+# 8. USER ok (bare +OK), PASS error (-ERR ...), DELE error (-ERR ...), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n-ERR Wrong pass\r\nDELE 3\r\n-ERR Not allowed\r\nQUIT\r\n+OK Bye\r\n",
+
+# 9. USER error (-ERR ...), PASS ok (+OK text), DELE error (-ERR ...), QUIT error (-ERR ...)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR User blocked\r\nPASS NEWpass123\r\n+OK Proceed\r\nDELE 2\r\n-ERR Message not found\r\nQUIT\r\n-ERR Quit denied\r\n",
+
+# 10. USER ok (+OK text), PASS ok (+OK text), DELE ok (+OK text), QUIT ok (+OK text, fixed)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hi\r\nPASS NEWpass123\r\n+OK Pass ok\r\nDELE 5\r\n+OK Deleted\r\nQUIT\r\n+OK End\r\n"
+
+]

@@ -1,0 +1,33 @@
+test_inputs = [
+
+# 1) USER ok (bare +OK), PASS ok (+OK text), RETR 1 positive with multiple lines (incl. blank), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK Logged in\r\nRETR 1\r\n+OK Message follows\r\nHeader: value\r\n\r\nBody line 1\r\n.\r\nQUIT\r\n+OK Bye\r\n",
+
+# 2) USER ok (+OK text), PASS ok (bare +OK), RETR 7 positive with single content line, QUIT ok (bare +OK)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hello\r\nPASS NEWpass123\r\n+OK\r\nRETR 7\r\n+OK One line\r\nOnly line\r\n.\r\nQUIT\r\n+OK\r\n",
+
+# 3) USER error (-ERR), PASS ok (+OK text), RETR 2 positive with only a blank line, QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Bad user\r\nPASS NEWpass123\r\n+OK Proceed\r\nRETR 2\r\n+OK Empty body allowed\r\n\r\n.\r\nQUIT\r\n+OK Closing\r\n",
+
+# 4) USER ok (+OK text), PASS error (-ERR), RETR 3 negative (-ERR), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK User ok\r\nPASS NEWpass123\r\n-ERR Wrong password\r\nRETR 3\r\n-ERR Not permitted\r\nQUIT\r\n+OK End\r\n",
+
+# 5) USER ok (bare +OK), PASS ok (bare +OK), RETR 4 negative, QUIT negative
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK\r\nPASS NEWpass123\r\n+OK\r\nRETR 4\r\n-ERR Message not found\r\nQUIT\r\n-ERR Quit failed\r\n",
+
+# 6) USER error (-ERR), PASS error (-ERR), RETR 5 positive with two text lines, QUIT ok (bare +OK)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n-ERR Blocked\r\nPASS NEWpass123\r\n-ERR Invalid\r\nRETR 5\r\n+OK Data\r\nLine A\r\nLine B\r\n.\r\nQUIT\r\n+OK\r\n",
+
+# 7) USER ok (+OK text), PASS ok (+OK text), RETR 3 positive with blank then text, QUIT negative
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Welcome\r\nPASS NEWpass123\r\n+OK Accepted\r\nRETR 3\r\n+OK Start\r\n\r\nBody after blank\r\n.\r\nQUIT\r\n-ERR Quit denied\r\n",
+
+# 8) USER ok (+OK text), PASS ok (+OK text), RETR 5 positive with several lines, QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Hi\r\nPASS NEWpass123\r\n+OK Logged in\r\nRETR 5\r\n+OK Multi-line\r\nSubject: Test\r\nDate: Today\r\n\r\nContent line\r\nFooter\r\n.\r\nQUIT\r\n+OK See you\r\n",
+
+# 9) USER ok (+OK text), PASS ok (+OK text), RETR 2 positive with two blank lines, QUIT ok (bare +OK)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK Fine\r\nPASS NEWpass123\r\n+OK Pass ok\r\nRETR 2\r\n+OK Double blank\r\n\r\n\r\n.\r\nQUIT\r\n+OK\r\n",
+
+# 10) USER ok (+OK text), PASS ok (+OK text), RETR 4 negative (-ERR), QUIT ok (+OK text)
+"+OK POP3 server ready\r\nUSER debug@localdomain.test\r\n+OK All good\r\nPASS NEWpass123\r\n+OK Proceed\r\nRETR 4\r\n-ERR Temporarily unavailable\r\nQUIT\r\n+OK Bye\r\n"
+
+]

@@ -1,0 +1,20 @@
+grammar_fault_1_remove_nonterminal.fan: Removed <transaction_state> from rule <authorization_state>
+grammar_fault_2_remove_nonterminal.fan: Removed <auth_exchanges> from rule <authorization_state>
+grammar_fault_3_remove_nonterminal.fan: Removed <crlf> from rule <LIST>
+grammar_fault_4_remove_nonterminal.fan: Removed "USER" from rule <USER>
+grammar_fault_5_remove_nonterminal.fan: Removed <authorization_state> from rule <start>
+grammar_fault_6_replace_nonterminal.fan: Replaced <Server:quit_response> with <USER> in rule <quit_exchange>
+grammar_fault_7_replace_nonterminal.fan: Replaced <crlf> with <list_response> in rule <banner>
+grammar_fault_8_replace_nonterminal.fan: Replaced <space> with <Server:banner> in rule <positive_response>
+grammar_fault_9_replace_nonterminal.fan: Replaced <space> with <user_response> in rule <USER>
+grammar_fault_10_replace_nonterminal.fan: Replaced <negative_response> with <USER> in rule <list_response>
+grammar_fault_11_add_symbol.fan: Inserted <Server:user_response> into rule <message_number>
+grammar_fault_12_add_symbol.fan: Inserted "+OK" into rule <transaction_state>
+grammar_fault_13_add_symbol.fan: Inserted <Client:LIST> into rule <text>
+grammar_fault_14_add_symbol.fan: Inserted <banner_exchange> into rule <quit_exchange>
+grammar_fault_15_add_symbol.fan: Inserted <Server:banner> into rule <transaction_exchanges>
+grammar_fault_16_reorder_symbols.fan: Reordered symbols in rule <LIST>
+grammar_fault_17_reorder_symbols.fan: Reordered symbols in rule <authorization_state>
+grammar_fault_18_reorder_symbols.fan: Reordered symbols in rule <PASS>
+grammar_fault_19_reorder_symbols.fan: Reordered symbols in rule <QUIT>
+grammar_fault_20_reorder_symbols.fan: Reordered symbols in rule <auth_exchanges>
