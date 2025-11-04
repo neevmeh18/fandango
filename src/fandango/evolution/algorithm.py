@@ -91,6 +91,7 @@ class Fandango:
         self.best_effort = best_effort
         self.current_max_nodes = 50
         self.remote_response_timeout = 15.0
+        self.nt_usage_log: list = []
 
         # Instantiate managers
         if self.grammar.fuzzing_mode == FuzzingMode.IO:
@@ -529,6 +530,16 @@ class Fandango:
                     # Abort if we received a message during fuzzing
                     continue
                 new_packet = next_tree.protocol_msgs()[-1]
+                nt_stack = []
+                stack = [new_packet.msg]
+                while stack:
+                    node = stack.pop()
+                    if hasattr(node, "symbol") and node.symbol.__class__.__name__ == "NonTerminal":
+                        nt_stack.append(str(node.symbol.name()))
+                    if hasattr(node, "children"):
+                        stack.extend(node.children)
+
+                LOGGER.info(f"NT_USED: {nt_stack}")
                 if (
                     new_packet.recipient is None
                     or not io_instance.parties[

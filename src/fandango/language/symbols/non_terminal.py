@@ -12,7 +12,11 @@ class NonTerminal(Symbol):
         Return the name of the non-terminal symbol.
         """
         return str(self._value)
-
+    @property
+    def symbol(self) -> str:
+        """For compatibility: return the raw string value of this NonTerminal."""
+        return str(self._value)
+    
     def __hash__(self) -> int:
         return hash((self._value, self._type))
 

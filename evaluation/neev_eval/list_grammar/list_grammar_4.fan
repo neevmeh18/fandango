@@ -19,9 +19,9 @@
 <QUIT> ::= "QUIT" <crlf>
 
 # ---- SERVER RESPONSES ----
-<user_response> ::= <positive_response_alone> #$$$$$$$ missing negative response 
+<user_response> ::= <positive_response_alone>|  <list_response>#$$$$$$$ missing negative response 
 <positive_response_alone> ::= '+OK' <crlf>
-<pass_response> ::= <positive_response> | <negative_response>
+<pass_response> ::= <positive_response> | 
 <list_response> ::= <positive_response> <multi_line> | <positive_response> | <positive_response_alone> | <negative_response>
 <quit_response> ::= <positive_response> | <negative_response>
 

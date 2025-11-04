@@ -15,7 +15,7 @@
 # ---- CLIENT COMMANDS ----
 <USER> ::= "USER" <space> "debug@localdomain.test" <crlf>
 <PASS> ::= "PASS" <space> "NEWpass123" <crlf>
-<LIST> ::= "LIST" <crlf> #$$$$$$$$$$$$$$$$$$$$$missing alt here
+<LIST> ::= "LIST" <crlf> | "LIST" <message_number> <crlf>
 <QUIT> ::= "QUIT" <crlf>
 
 # ---- SERVER RESPONSES ----
@@ -34,3 +34,5 @@
 <crlf> ::= "\r\n"
 <text> ::= r"[^\r\n]*"
 <number> ::= r"[0-9]+"
+<message_number> ::= <number>
+where int(<message_number>) >= 1 and int(<message_number>) <= 10

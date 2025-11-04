@@ -49,6 +49,7 @@ class Grammar(NodeVisitor):
         self._local_variables = local_variables or {}
         self._global_variables = global_variables or {}
         self._parser = Parser(self.rules)
+        self.usage_log: list[dict] = [] #tracks nt used per session
 
     @property
     def grammar_settings(self) -> Sequence[HasSettings]:
@@ -242,6 +243,12 @@ class Grammar(NodeVisitor):
         )
         root = root.children[fuzzed_idx]
         root._parent = None
+        try:
+            packet_str = str(root)  # Or use root.to_string() if defined
+        except Exception:
+            packet_str = "<unstringifiable>"
+        self.log_usage(root, packet_str, success=True)
+        return root
         return root
 
     def update(self, grammar: Union["Grammar", dict[NonTerminal, Node]], prime=True):
@@ -285,13 +292,36 @@ class Grammar(NodeVisitor):
         hookin_parent: Optional[DerivationTree] = None,
         include_controlflow: bool = False,
     ):
-        return self._parser.parse(
+        # perform actual parse
+        tree = self._parser.parse(
             word,
             start,
             mode=mode,
             hookin_parent=hookin_parent,
             include_controlflow=include_controlflow,
         )
+
+        # convert packet to a string for logging
+        try:
+            packet_str = word if isinstance(word, str) else str(word)
+        except Exception:
+            packet_str = "<unserializable>"
+
+        if tree is not None:
+            # successful parse — log the derived tree and packet
+            try:
+                self.log_usage(tree, packet_str, success=True)
+            except Exception:
+                # ensure parse() doesn't break if logging has an unexpected error
+                LOGGER.exception("log_usage failed on successful parse")
+        else:
+            # failed parse — record a parse failure entry
+            try:
+                self.log_usage(None, packet_str, success=False, error_type="parse_fail")
+            except Exception:
+                LOGGER.exception("log_usage failed on failed parse")
+
+        return tree
 
     def parse_forest(
         self,
@@ -397,6 +427,15 @@ class Grammar(NodeVisitor):
 
     def update_parser(self):
         self._parser = Parser(self.rules)
+
+    def _build_parser(self):
+        """Rebuild parser after mutations (internal use)."""
+        self._parser = Parser(self.rules)
+
+    # Optional public alias
+    def build_parser(self):
+        """Public API for rebuilding parser (safe wrapper)."""
+        self._build_parser()
 
     def compute_kpath_coverage(
         self, derivation_trees: list[DerivationTree], k: int
@@ -693,3 +732,46 @@ class Grammar(NodeVisitor):
 
     def get_max_repetition(self):
         return nodes.MAX_REPETITIONS
+    
+    def log_usage(self, tree, packet: str, success: bool, error_type: str = None):
+        """Log which nonterminals were used to derive `packet`, with outcome.
+
+        - Uses format_as_spec() on symbols to avoid calling str() on NonTerminal.
+        - Deduplicates non-terminals while preserving order (we only need occurrence info).
+        """
+        if not hasattr(self, "usage_log"):
+            self.usage_log = []
+        if tree is None:
+            nts = []
+        else:
+            # flatten returns DerivationTree nodes; node.is_non_terminal exists
+            raw = []
+            for node in tree.flatten():
+                if node.is_non_terminal:
+                    sym = node.symbol
+                    # Prefer format_as_spec(); fall back to name() or str() for safety
+                    if hasattr(sym, "format_as_spec"):
+                        raw.append(sym.format_as_spec())
+                    elif hasattr(sym, "name"):
+                        raw.append(sym.name())
+                    else:
+                        raw.append(str(sym))
+            # deduplicate while preserving order
+            seen = set()
+            nts = []
+            for n in raw:
+                if n not in seen:
+                    seen.add(n)
+                    nts.append(n)
+
+        self.usage_log.append(
+            {
+                "packet": packet,
+                "nonterminals": nts,
+                "success": bool(success),
+                "error_type": error_type,
+            }
+        )
+
+
+
