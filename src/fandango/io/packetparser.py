@@ -4,7 +4,7 @@ from typing import Optional
 
 from fandango.errors import FandangoFailedError, FandangoParseError, FandangoValueError
 from fandango.io import FandangoIO
-from fandango.io.packetforecaster import PacketForecaster
+from fandango.io.navigation.packetforecaster import ForecastingResult
 from fandango.language import Grammar, NonTerminal, DerivationTree
 from fandango.language.grammar import ParsingMode
 from fandango.language.grammar.parser.iterative_parser import IterativeParser
@@ -26,7 +26,7 @@ def _find_next_fragment(
 
 def parse_next_remote_packet(
     grammar: Grammar,
-    forecast: PacketForecaster.ForecastingResult,
+    forecast: ForecastingResult,
     io_instance: FandangoIO,
 ):
     if len(io_instance.get_received_msgs()) == 0:
@@ -98,11 +98,19 @@ def parse_next_remote_packet(
             )
             if time.time() - start_time > wait_for_completion_time:
                 if len(complete_parses) == 0:
+                    incomplete_nt_list = map(lambda x: repr(x), available_non_terminals)
+                    nt_list = map(
+                        lambda x: repr(x), forecast_non_terminals.get_non_terminals()
+                    )
+                    incomplete_nt_str = " | ".join(incomplete_nt_list)
+                    applicable_nt_str = str(" | ".join(nt_list))
+                    received_msgs_str = str(io_instance.get_received_msgs())
+
                     raise FandangoFailedError(
-                        "Timeout while waiting for next message fragment from "
-                        + msg_sender
-                        + ". Messages: "
-                        + str(io_instance.get_received_msgs())
+                        f"Timeout while waiting for next message fragment from {msg_sender}. "
+                        + f"Incompletely parsed NonTerminals: {incomplete_nt_str} "
+                        + f"Applicable NonTerminals: {applicable_nt_str} "
+                        + f"Received messages: {received_msgs_str}"
                     )
                 else:
                     continue_parse = False
@@ -116,7 +124,7 @@ def parse_next_remote_packet(
 
         for non_terminal in set(available_non_terminals):
             parser = nt_parsers[non_terminal]
-            parse_tree = next(parser.consume(next_fragment), None)
+            parse_tree, is_complete = next(parser.consume(next_fragment), (None, None))
             if parse_tree is not None:
                 parse_tree = parser.collapse(parse_tree)
                 assert parse_tree is not None

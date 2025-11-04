@@ -6,6 +6,8 @@ from fandango.language.grammar.nodes.alternative import Alternative
 from fandango.language.grammar.nodes.node import Node, NodeType
 from fandango.language.symbols.non_terminal import NonTerminal
 from fandango.language.tree import DerivationTree
+from fandango.language.symbols.symbol import Symbol
+from fandango.language.symbols.non_terminal import NonTerminal
 
 if TYPE_CHECKING:
     import fandango
@@ -23,6 +25,9 @@ class NonTerminalNode(Node):
         self.sender = sender
         self.recipient = recipient
         super().__init__(NodeType.NON_TERMINAL, grammar_settings)
+
+    def to_symbol(self) -> Symbol:
+        return self.symbol
 
     def fuzz(
         self,
@@ -116,9 +121,15 @@ class NonTerminalNode(Node):
         return parties
 
     def descendents(
-        self, grammar: "fandango.language.grammar.grammar.Grammar"
+        self,
+        grammar: "fandango.language.grammar.grammar.Grammar",
+        filter_controlflow: bool = False,
     ) -> Iterator["Node"]:
-        yield grammar.rules[self.symbol]
+        node = grammar.rules[self.symbol]
+        if filter_controlflow and node.is_controlflow:
+            yield from node.descendents(grammar, filter_controlflow=True)
+        else:
+            yield node
 
     def in_parties(self, parties: list[str]) -> bool:
         return not self.sender or self.sender in parties
