@@ -156,6 +156,8 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+/src/fandango/language/output
+
 # Cython debug symbols
 cython_debug/
 

@@ -27,6 +27,10 @@ class CharSet(Node):
         in_message: bool = False,
     ) -> list[DerivationTree]:
         raise NotImplementedError("CharSet fuzzing not implemented")
+    
+    def to_symbol(self) -> Terminal:
+        return Terminal(self.chars)
+
 
     def accept(
         self,

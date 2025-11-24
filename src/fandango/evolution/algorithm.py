@@ -484,6 +484,11 @@ class Fandango:
         spec_env_global, _ = self.grammar.get_spec_env()
         io_instance: FandangoIO = spec_env_global["FandangoIO"].instance()
         history_tree: DerivationTree = random.choice(self.population)
+
+        #exposing last tree so i can get derivation tree in case of failures
+        self._last_history_tree = history_tree
+        self._last_failure = None
+
         packet_selector = PacketSelector(
             self.grammar, io_instance, history_tree, self.diversity_k
         )
@@ -505,6 +510,7 @@ class Fandango:
                 len(packet_selector.get_next_parties()) == 0
                 and not packet_selector.is_complete()
             ):
+                self._last_failure = {"error": "Could not forecast next packet", "history_tree": self._last_history_tree}
                 raise FandangoFailedError("Could not forecast next packet")
 
             if (
@@ -514,6 +520,7 @@ class Fandango:
                 history_tree = random.choice(
                     list(packet_selector.forecasting_result.complete_trees)
                 )
+                self._last_history_tree = history_tree
                 self.past_io_derivations.add(history_tree)
                 self._initial_solutions.clear()
                 yield history_tree
@@ -527,7 +534,7 @@ class Fandango:
                     log_message_coverage(
                         packet_selector._compute_message_coverage_score(2, True)
                     )
-                    return
+                    
                 log_guidance_hint("Starting new protocol run.")
                 io_instance.reset_parties()
                 history_tree = DerivationTree(NonTerminal(self.start_symbol), [])
@@ -591,6 +598,8 @@ class Fandango:
                                         all_allowed_packets,
                                     )
                                 )
+                                msg = f"Couldn't find solution for any packet: {nonterminals_str}"
+                                self._last_failure = {"error": msg, "history_tree": self._last_history_tree}
                                 raise FandangoFailedError(
                                     f"Couldn't find solution for any packet: {nonterminals_str}"
                                 )
@@ -624,11 +633,14 @@ class Fandango:
                         new_packet.sender, new_packet.recipient, new_packet.msg, True
                     )
                 history_tree = next_tree
+                self._last_history_tree = history_tree
             else:
                 wait_start = time.time()
                 while not io_instance.received_msg():
                     if time.time() - wait_start > self.remote_response_timeout:
                         external_parties = packet_selector.next_external_parties()
+                        msg = f"Timed out while waiting for message from remote party. Expected message from party: {', '.join(external_parties)}"
+                        self._last_failure = {"error": msg, "history_tree": self._last_history_tree, "expected_from": external_parties}
                         raise FandangoFailedError(
                             f"Timed out while waiting for message from remote party. Expected message from party: {', '.join(external_parties)}"
                         )

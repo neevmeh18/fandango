@@ -5,6 +5,7 @@ from typing import Dict, Optional, List, Tuple, Any
 
 # === Fandango imports (new paths) ===
 from fandango.language.parse import parse
+from fandango.language.push_trial import run_and_mutate
 from fandango.language.symbols import NonTerminal, Terminal
 from fandango.language.grammar.node_visitors.node_visitor import NodeVisitor
 from fandango.language.grammar.nodes.alternative import Alternative
@@ -336,6 +337,14 @@ def mutate_candidate_grammars(
                 name = f"{earlier_mutation}+reorder_{idx}.fan"
                 run_mutation(mutator, name)
 
+            # === REMOVAL ===
+            rem_finder = RemovalMutationFinder(grammar, target_rule, grammar_settings, removal_mode="concat")
+            for idx, target in enumerate(rem_finder.find_targets()):
+                mutator = target.create_mutator(grammar)
+                name = f"{earlier_mutation}+removal_{idx}.fan"
+                run_mutation(mutator, name)
+
+
             # === REPETITION STAR ===
             rep_finder = RepetitionMutationFinder(grammar, target_rule, grammar_settings)
             for idx, target in enumerate(rep_finder.find_targets()):
@@ -515,19 +524,19 @@ def first_round_mutations(grammar, rule, nonterminals, literals, test_inputs, pr
         apply_mutation(
                 grammar, rule, mutator, test_inputs, previous_scores, output_dir, unparser, rule, grammar_settings, nonterminals
             )
-    
 
-    
- 
-    # === REMOVAL
-    removal_finder = RemovalMutationFinder(grammar, rule, grammar_settings)
-    for idx, target in enumerate(removal_finder.find_targets()):
+    # === REMOVAL ===
+
+    rem_finder = RemovalMutationFinder(grammar, rule, grammar_settings, removal_mode="alt")
+    for idx, target in enumerate(rem_finder.find_targets()):
         mutator = target.create_mutator(grammar)
-        # include the rule symbol to make filenames clearer
-        output_dir = os.path.join(f"removal_{rule.symbol}_{idx}.fan")
+        output_dir = os.path.join(f"removal_{idx}.fan")
         apply_mutation(
-            grammar, rule, mutator, test_inputs, previous_scores, output_dir, unparser, rule, grammar_settings, nonterminals
+            grammar, rule, mutator, test_inputs, previous_scores, output_dir,
+            unparser, rule, grammar_settings, nonterminals
         )
+
+
 
     """
     # === REPETITION PLUS
@@ -555,7 +564,7 @@ def first_round_mutations(grammar, rule, nonterminals, literals, test_inputs, pr
 # === Main Driver ===
 
 def main():
-    fan_file = "../../../evaluation/neev_eval/faulty_grammars/grammar_fault_14_add_symbol.fan"
+    fan_file = "../../../evaluation/neev_eval/faulty_grammars/grammar_fault_4_remove_nonterminal.fan"
     try:
         grammar = load_fan_grammar(fan_file)
     except Exception as e:
@@ -601,37 +610,45 @@ def main():
 ]
 
     # call fault localiser and get suspiciousness ranking with intital parsing scores
-    sbfl_ranked_rules, initial_scores = compute_fault_localisation(
-        "../../../evaluation/neev_eval/faulty_grammars/grammar_fault_14_add_symbol.fan",
+    sbfl_ranked_rules, initial_scores, error_flag = compute_fault_localisation(
+        "../../../evaluation/neev_eval/faulty_grammars/grammar_fault_4_remove_nonterminal.fan",
         port=25110,
         test_inputs=test_inputs,
-        run_stream=True
     )
     print("initial_scores:", initial_scores)
 
 
     #iterate on every rule in the ranking and try the first round of mutations - this logic should be changed 
     #i want to try first mutation on every rule with a tied rank and then mutate the rule that was scored highest
-    for rule in sbfl_ranked_rules:
+    if error_flag:
+        if not sbfl_ranked_rules == []:
+            for rule in sbfl_ranked_rules:
 
-        if rule != NonTerminal("<quit_exchange>"):
-            continue
+                #if rule != NonTerminal("<quit_exchange>"):
+                #    continue
+                
+                first_round_mutations(
+                    grammar, rule, nonterminals, literals, test_inputs, initial_scores, unparser, grammar_settings
+                )
+                print("First round mutations are complete")
+                mutate_candidate_grammars(
+                    candidates_dir="output",
+                    rule=rule,
+                    nonterminals=nonterminals,
+                    literals=literals,
+                    test_inputs=test_inputs,
+                    unparser=unparser,
+                    grammar_settings=grammar_settings,
+                    max_candidates=50,
+                    round_num=2
+                )
         
-        first_round_mutations(
-            grammar, rule, nonterminals, literals, test_inputs, initial_scores, unparser, grammar_settings
-        )
-        print("First round mutations are complete")
-        mutate_candidate_grammars(
-            candidates_dir="output",
-            rule=rule,
-            nonterminals=nonterminals,
-            literals=literals,
-            test_inputs=test_inputs,
-            unparser=unparser,
-            grammar_settings=grammar_settings,
-            max_candidates=50,
-            round_num=2
-        )
+        print("FINAL PUSH PHASE.....")
+        p = run_and_mutate("../../../evaluation/neev_eval/faulty_grammars/grammar_fault_4_remove_nonterminal.fan", 10, 10)
+
+    print("PERFECT GRAMMAR")
+
+
 
 
 if __name__ == "__main__":

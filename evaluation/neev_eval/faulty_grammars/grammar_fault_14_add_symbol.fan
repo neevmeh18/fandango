@@ -25,3 +25,25 @@
 <text> ::= r"[^\r\n]*"
 <number> ::= r"[0-9]+"
 <message_number> ::= <number>
+
+
+
+fandango_is_client = True
+
+class Client(ConnectParty):
+    def __init__(self):
+        super().__init__(
+            ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,
+            endpoint_type=EndpointType.CONNECT,
+            uri="tcp://localhost:25110"
+        )
+        self.start()
+
+class Server(ConnectParty):
+    def __init__(self):
+        super().__init__(
+            ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,
+            endpoint_type=EndpointType.OPEN,
+            uri="tcp://localhost:25110"
+        )
+        self.start()

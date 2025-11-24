@@ -2,7 +2,7 @@ import os
 import json
 from multiprocessing import Process, Queue
 from typing import List, Dict, Optional
-from fandango.language.parse import parse as parse_grammar
+
 from server_permissiveness_check import is_too_permissive
 import sys
 from server_validation import validate_grammar_with_server, decision_logic
@@ -120,6 +120,26 @@ def score_grammar(
             if name_nt in nonterminals or "mutation" in name_nt:
                 f.write(f"{name_nt} ::= {unparser.visit(rule)}\n")
 
+        # ✅ Always append your Python code at end
+        f.write("\n# ---- Auto-Generated Python Footer ----\n")
+        f.write("fandango_is_client = True\n\n")
+        f.write("class Client(ConnectParty):\n")
+        f.write("    def __init__(self):\n")
+        f.write("        super().__init__(\n")
+        f.write("            ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,\n")
+        f.write("            endpoint_type=EndpointType.CONNECT,\n")
+        f.write("            uri=\"tcp://localhost:25110\"\n")
+        f.write("        )\n")
+        f.write("        self.start()\n\n")
+        f.write("class Server(ConnectParty):\n")
+        f.write("    def __init__(self):\n")
+        f.write("        super().__init__(\n")
+        f.write("            ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,\n")
+        f.write("            endpoint_type=EndpointType.OPEN,\n")
+        f.write("            uri=\"tcp://localhost:25110\"\n")
+        f.write("        )\n")
+        f.write("        self.start()\n")
+
 
     round_dir = os.path.join("output", f"round{round_num}")
     update_candidate_metadata({
@@ -142,8 +162,11 @@ def score_grammar(
     # 🔁 Save to best_candidates if perfect
     if all(v is None for v in score_map.values()):
 
-
-        metrics = validate_grammar_with_server(full_name, rule_name.name(), port=25110, repetitions=3)
+        try:
+            metrics = validate_grammar_with_server(full_name, rule_name.name(), port=25110, repetitions=3)
+        except Exception as e:
+            metrics = {}
+            print("fonud this problem", e)
         decision = decision_logic(metrics)
         if decision == "reject":
             print("❌ Candidate rejected: too permissive on client side.")
@@ -156,6 +179,7 @@ def score_grammar(
         
         elif decision == "inconclusive":
             print("❓ Candidate inconclusive: mutation never triggered.")
+            return 0
 
 
         if is_too_permissive(grammar, parse_with_timeout):
@@ -171,6 +195,26 @@ def score_grammar(
                 name_nt = nt.name()
                 if name_nt in nonterminals or "mutation" in name_nt:
                     f.write(f"{name_nt} ::= {unparser.visit(rule)}\n")
+
+                # ✅ Always append your Python code at end
+            f.write("\n# ---- Auto-Generated Python Footer ----\n")
+            f.write("fandango_is_client = True\n\n")
+            f.write("class Client(ConnectParty):\n")
+            f.write("    def __init__(self):\n")
+            f.write("        super().__init__(\n")
+            f.write("            ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,\n")
+            f.write("            endpoint_type=EndpointType.CONNECT,\n")
+            f.write("            uri=\"tcp://localhost:25110\"\n")
+            f.write("        )\n")
+            f.write("        self.start()\n\n")
+            f.write("class Server(ConnectParty):\n")
+            f.write("    def __init__(self):\n")
+            f.write("        super().__init__(\n")
+            f.write("            ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,\n")
+            f.write("            endpoint_type=EndpointType.OPEN,\n")
+            f.write("            uri=\"tcp://localhost:25110\"\n")
+            f.write("        )\n")
+            f.write("        self.start()\n")
 
         #sys.exit(0)
 
@@ -243,7 +287,7 @@ def alternative_removal(
                 port=25110,
                 repetitions=3,
             )
-            decision = decision_logic(metrics)
+            decision = decision_logic(metrics, "alt_removal")
 
             if decision == "accept":
                 # Copy candidate into best_candidates
@@ -256,6 +300,26 @@ def alternative_removal(
                         name_nt = nt.name()
                         if name_nt in nonterminals or "mutation" in name_nt:
                             f.write(f"{name_nt} ::= {unparser.visit(rule)}\n")
+
+                     # ✅ Always append your Python code at end
+                    f.write("\n# ---- Auto-Generated Python Footer ----\n")
+                    f.write("fandango_is_client = True\n\n")
+                    f.write("class Client(ConnectParty):\n")
+                    f.write("    def __init__(self):\n")
+                    f.write("        super().__init__(\n")
+                    f.write("            ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,\n")
+                    f.write("            endpoint_type=EndpointType.CONNECT,\n")
+                    f.write("            uri=\"tcp://localhost:25110\"\n")
+                    f.write("        )\n")
+                    f.write("        self.start()\n\n")
+                    f.write("class Server(ConnectParty):\n")
+                    f.write("    def __init__(self):\n")
+                    f.write("        super().__init__(\n")
+                    f.write("            ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,\n")
+                    f.write("            endpoint_type=EndpointType.OPEN,\n")
+                    f.write("            uri=\"tcp://localhost:25110\"\n")
+                    f.write("        )\n")
+                    f.write("        self.start()\n")
 
                 print(f"[AltRemoval] ✅ Grammar fixed and saved: {best_path}")
                 plan.revert_all()

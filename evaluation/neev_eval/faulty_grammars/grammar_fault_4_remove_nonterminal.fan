@@ -7,10 +7,11 @@
 <auth_exchanges> ::= <Client:USER> <Server:user_response> <Client:PASS> <Server:pass_response>
 <transaction_exchanges> ::= <Client:LIST> <Server:list_response>
 <quit_exchange> ::= <Client:QUIT> <Server:quit_response>
-<USER> ::= <space> "debug@localdomain.test" <crlf>
+<USER> ::= "USER" <space> "debug@localdomain.test" <crlf>
 <PASS> ::= "PASS" <space> "NEWpass123" <crlf>
 <LIST> ::= "LIST" <crlf> | "LIST" <space> <message_number> <crlf>
-<QUIT> ::= "QUIT" <crlf>
+<QUIT> ::= "QUIT" <crlf> | <WRONG>
+<WRONG> ::= "oops"
 <user_response> ::= <positive_response_alone> | <negative_response>
 <positive_response_alone> ::= '+OK' <crlf>
 <pass_response> ::= <positive_response> | <negative_response>
@@ -25,3 +26,25 @@
 <text> ::= r"[^\r\n]*"
 <number> ::= r"[0-9]+"
 <message_number> ::= <number>
+
+
+
+fandango_is_client = True
+
+class Client(ConnectParty):
+    def __init__(self):
+        super().__init__(
+            ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,
+            endpoint_type=EndpointType.CONNECT,
+            uri="tcp://localhost:25110"
+        )
+        self.start()
+
+class Server(ConnectParty):
+    def __init__(self):
+        super().__init__(
+            ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,
+            endpoint_type=EndpointType.OPEN,
+            uri="tcp://localhost:25110"
+        )
+        self.start()

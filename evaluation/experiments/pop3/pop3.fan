@@ -16,8 +16,7 @@
 <USER> ::= "USER" <space> "debug@localdomain.test" <crlf>
 <PASS> ::= "PASS" <space> "NEWpass123" <crlf>
 <LIST> ::= "LIST" <crlf> | "LIST" <space> <message_number> <crlf>
-<QUIT> ::= "QUIT" <crlf> | <WRONG>
-<WRONG> ::= "NOT CORRECT"
+<QUIT> ::= "QUIT" <crlf>
 
 # ---- SERVER RESPONSES ----
 <user_response> ::= <positive_response_alone> | <negative_response>
@@ -38,7 +37,8 @@
 <number> ::= r"[0-9]+"
 <message_number> ::= <number>
 where int(<message_number>) >= 1 and int(<message_number>) <= 10
-# ---- Auto-Generated Python Footer ----
+
+
 
 
 fandango_is_client = True

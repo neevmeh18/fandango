@@ -310,7 +310,22 @@ class UdpTcpProtocolDecorator(ProtocolDecorator):
                         data, addr = self._connection.recvfrom(self._buffer_size)
                         self.current_remote_addr = addr
                     if len(data) == 0:
-                        continue  # Keep waiting if connection is open but no data
+                        # Remote closed the connection (EOF). Clean up this connection
+                        # so we can accept a new one and get the banner again.
+                        try:
+                            self._connection.shutdown(socket.SHUT_RDWR)
+                        except Exception:
+                            pass
+                        try:
+                            self._connection.close()
+                        except Exception:
+                            pass
+                        self._connection = None
+                        # Wait for the next accept() to populate self._connection again.
+                        self._wait_accept()
+                        # If _wait_accept returned without a connection,
+                        # loop will continue and thread will eventually exit if not running.
+                        continue
                     self._party_instance.receive_msg(None, data)
             except Exception:
                 self._running = False

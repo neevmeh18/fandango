@@ -132,7 +132,7 @@ class Client(ConnectParty):
         super().__init__(
             ownership=Ownership.FANDANGO_PARTY if fandango_is_client else Ownership.EXTERNAL_PARTY,
             endpoint_type=EndpointType.CONNECT,
-            uri="tcp://localhost:8025"
+            uri="tcp://localhost:25525:25"
         )
         self.start()
 
@@ -141,6 +141,6 @@ class Server(ConnectParty):
         super().__init__(
             ownership=Ownership.EXTERNAL_PARTY if fandango_is_client else Ownership.FANDANGO_PARTY,
             endpoint_type=EndpointType.OPEN,
-            uri="tcp://localhost:8025"
+            uri="tcp://localhost:25525:25"
         )
         self.start()
